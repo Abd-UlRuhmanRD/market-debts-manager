@@ -1,0 +1,10 @@
+node_modules
+dist
+.next
+out
+.npm-cache
+.env
+.env.local
+.env.*.local
+*.log
+dev-server*.log

@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum DebtSection {
+  debts_on_market
+  debts_from_customers
+}
+
+enum TransactionType {
+  debt
+  payment
+}
+
+model DebtPerson {
+  id           String            @id @default(uuid()) @db.Uuid
+  section      DebtSection
+  name         String
+  balance      Decimal           @default(0) @db.Decimal(12, 2)
+  createdAt    DateTime          @default(now()) @map("created_at")
+  transactions DebtTransaction[]
+
+  @@index([section, name])
+  @@map("debt_people")
+}
+
+model DebtTransaction {
+  id        String          @id @default(uuid()) @db.Uuid
+  personId  String          @map("person_id") @db.Uuid
+  type      TransactionType
+  amount    Decimal         @db.Decimal(12, 2)
+  note      String          @default("")
+  date      DateTime
+  createdAt DateTime        @default(now()) @map("created_at")
+  person    DebtPerson      @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([personId, date(sort: Desc)])
+  @@map("debt_transactions")
+}
